@@ -1,16 +1,15 @@
 package com.mygdx.game.desktop;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.mygdx.game.Drop;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.mygdx.game.Basic3dTest;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 800;
-		config.height = 480;
-		config.title = "Drop";
+		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.setWindowedMode(480, 320);
+		config.setTitle("3d-Demo");
 
-		new LwjglApplication(new Drop(), config);
+		new Lwjgl3Application(new Basic3dTest(), config);
 	}
 }
