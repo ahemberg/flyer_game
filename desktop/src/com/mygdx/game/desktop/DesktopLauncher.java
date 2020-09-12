@@ -1,16 +1,20 @@
 package com.mygdx.game.desktop;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.mygdx.game.Drop;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.mygdx.game.MainGame;
 
 public class DesktopLauncher {
-	public static void main (String[] arg) {
-		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 800;
-		config.height = 480;
-		config.title = "Drop";
 
-		new LwjglApplication(new Drop(), config);
+	private static final String GAME_TITLE = "FlatWorld";
+	private static final int WIDTH = 960;
+	private static final int HEIGHT = 640;
+
+	public static void main (String[] arg) {
+		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.setWindowedMode(WIDTH, HEIGHT);
+		config.setTitle(GAME_TITLE);
+
+		new Lwjgl3Application(new MainGame(WIDTH, HEIGHT), config);
 	}
 }
