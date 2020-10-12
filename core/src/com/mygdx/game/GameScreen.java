@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.*;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 
 public class GameScreen extends InputAdapter implements Screen {
@@ -16,10 +17,12 @@ public class GameScreen extends InputAdapter implements Screen {
   public static final Color BG_COLOR = Colors.SKY.getColor();
   private static final float RENDER_DISTANCE = 100_0000f;
   private static final boolean SHOW_AXES = true;
-  private final float GRID_MIN = -1000f;
-  private final float GRID_MAX = 1000f;
-  private final float GRID_STEP = 50f;
-  private final float GROUND_WIDTH = 10000;
+  public static final float PLAYER_SPEED = 0.5f;
+  private static final float GRID_MIN = -1000f;
+  private static final float GRID_MAX = 1000f;
+  private static final float GRID_STEP = 50f;
+  private static final float GROUND_WIDTH = 10000;
+
   private final MainGame game;
   private final PerspectiveCamera camera;
   private final Environment environment;
@@ -33,7 +36,9 @@ public class GameScreen extends InputAdapter implements Screen {
   //private final Texture groundTexture;
   private final SpriteBatch batch;
   private final Player player;
-  private final FirstPersonCameraController firstPersonCameraController;
+  //private final FirstPersonCameraController firstPersonCameraController;
+
+  private float throttle;
 
   GameScreen(final MainGame game) {
     this.modelBatch = new ModelBatch(new DefaultShaderProvider());
@@ -50,10 +55,10 @@ public class GameScreen extends InputAdapter implements Screen {
     this.font = new BitmapFont();
     this.camera = createCamera();
     this.player = new Player(this.camera);
-    this.firstPersonCameraController = new FirstPersonCameraController(this.camera);
-    firstPersonCameraController.setVelocity(200);
+    //this.firstPersonCameraController = new FirstPersonCameraController(this.camera);
+    //firstPersonCameraController.setVelocity(PLAYER_VELOCITY);
     //firstPersonCameraController.setDegreesPerPixel(0);
-    Gdx.input.setInputProcessor(new InputMultiplexer(this, firstPersonCameraController));
+    //Gdx.input.setInputProcessor(new InputMultiplexer(this, firstPersonCameraController));
   }
 
   private PerspectiveCamera createCamera() {
@@ -144,11 +149,45 @@ public class GameScreen extends InputAdapter implements Screen {
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
     Gdx.gl.glClearColor(BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
 
-    firstPersonCameraController.update();
-    if (camera.position.y < 0.5) {
+    //firstPersonCameraController.update();
+
+    //TODO Arguably this logic (throttle and all) should live in the player class.
+
+
+    if (Gdx.input.isKeyPressed(Input.Keys.C) && throttle < 1.0) {
+      throttle += 0.0005f;
+    } else if (Gdx.input.isKeyPressed(Input.Keys.X) && throttle > 0.0) {
+      throttle -= 0.0005f;
+    }
+
+    if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+      camera.rotate(camera.direction, -0.1f);
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+      camera.rotate(camera.direction, 0.1f);
+    }/*
+    if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+      camera.rotateAround(camera.direction, Vector3.Y, 0.1f);
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+      camera.rotateAround(camera.direction, Vector3.Y, -0.1f);
+    }*/
+    if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+      camera.rotate(new Vector3(camera.direction).crs(Vector3.Y), -0.1f); //TODO This goes around the actual Y of
+      //the world. 
+    }
+    if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+      camera.rotate(new Vector3(camera.direction).crs(Vector3.Y), 0.1f);
+    }
+
+    camera.translate(new Vector3(camera.direction).scl(throttle * PLAYER_SPEED));
+
+    if (camera.position.y < 0.5) { //TODO Calculate ground collision
       camera.position.set(camera.position.x, 0.5f, camera.position.z);
     }
 
+    //System.out.println(heightField.getPositionAt(camera.position, 0, 0));
+    //ground.environment
 
     player.update();
 
@@ -168,6 +207,8 @@ public class GameScreen extends InputAdapter implements Screen {
 
     font.draw(batch, String.format("Java Heap %fMB", Gdx.app.getJavaHeap() / 1E6), 10, game.getHeight() - 10);
     font.draw(batch, String.format("Frame Rate %d", Gdx.graphics.getFramesPerSecond()), game.getWidth() - 150, game.getHeight() - 10);
+
+    font.draw(batch, String.format("Throttle: %d%%", Math.round(throttle * 100f)), game.getWidth() - 150, 20);
 
     batch.end();
     camera.update();

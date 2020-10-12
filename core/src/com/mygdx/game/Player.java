@@ -2,12 +2,14 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Player {
   private final Vector3 position;
   private final Vector3 speed;
   private final Vector3 viewDirection;
   private final PerspectiveCamera camera;
+
 
   Player(final PerspectiveCamera camera) {
     this.camera = camera;
